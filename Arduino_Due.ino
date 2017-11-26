@@ -1,3 +1,5 @@
+//Eu deixei os comentários do código original de prepósito
+
 /*
  Example MQTT-switch-relay-node with 4 buttons and 4 leds 
  
