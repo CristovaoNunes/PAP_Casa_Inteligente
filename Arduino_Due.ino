@@ -81,7 +81,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   
   if (content == "ReleLuzEntrada01OFF") {
-    DesligarReleLuzEntrada01;
+    DesligarReleLuzEntrada01();
   }
 }
 
