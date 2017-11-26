@@ -31,6 +31,8 @@ IPAddress ip(192,168,0,238);
 //Inicialização do MQTT
 //IP do Broker MQTT
 byte BrokerMQTT[] = { 192, 168, 0, 20 };
+//Inicialização do "Serviço" EthernetClient
+EthernetClient ethClient;
 //Callback do Broker
 void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
@@ -43,7 +45,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.println(topic);
   Serial.println(content); // message sent out by button actions is returned from broker and serial printed
   // Set specific virtual switches on basis of specific incoming messages 
-  
+
+  //Verifica se o conteudo do Tópico é: ReleLuzEntrada01
   if (content == "ReleLuzEntrada01ON") {
     LigarReleLuzEntrada01();
   }
@@ -51,9 +54,16 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if (content == "ReleLuzEntrada01OFF") {
     DesligarReleLuzEntrada01;
   }
+  
+  //Verifica se o conteudo do Tópico é: ReleLuzSala01
+  if (content == "ReleLuzSala01ON") {
+    LigarReleLuzSala01();
+  }
+  
+  if (content == "ReleLuzSala01OFF") {
+    DesligarReleLuzSala01;
+  }  
 }
-//Inicialização do "Serviço" EthernetClient
-EthernetClient ethClient;
 //Inicialização do "Serviço" PubSubClient
 PubSubClient client(BrokerMQTT, 1883, callback, ethClient);
 
@@ -123,17 +133,21 @@ void reconnect(){
 //Controlo Relé Luz de Entrada 01
 void LigarReleLuzEntrada01(){
   digitalWrite(ReleLuzEntrada01, LOW);
+  client.publish("/Casa/ReleLuzEntrada01","ON");
   }
 void DesligarReleLuzEntrada01(){
   digitalWrite(ReleLuzEntrada01, HIGH);
+  client.publish("/Casa/ReleLuzEntrada01","OFF");
   }
 
 //Controlo Relé Luz da Sala 01
 void LigarReleLuzSala01(){
   digitalWrite(ReleLuzSala01, LOW);
+  client.publish("/Casa/ReleLuzSala01","ON");
   }
 void DesligarReleLuzSala01(){
   digitalWrite(ReleLuzSala01, HIGH);
+  client.publish("/Casa/ReleLuzSala01","OFF");
   }
 
 //Controlo Relé Luz da sala 02
