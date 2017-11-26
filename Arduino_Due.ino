@@ -52,7 +52,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   
   if (content == "ReleLuzEntrada01OFF") {
-    DesligarReleLuzEntrada01;
+    DesligarReleLuzEntrada01();
   }
   
   //Verifica se o conteudo do Tópico é: ReleLuzSala01
@@ -61,7 +61,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   
   if (content == "ReleLuzSala01OFF") {
-    DesligarReleLuzSala01;
+    DesligarReleLuzSala01();
   }  
 }
 //Inicialização do "Serviço" PubSubClient
