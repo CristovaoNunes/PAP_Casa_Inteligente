@@ -27,7 +27,7 @@
 // Set led variables to Arduino digital pins
 int ReleLuzEntrada01 = 2;
 int ReleLuzSala01 = 3;
-int ReleLuzSala02 = 4;
+int ReleLuzSala02 = 22;
 int ReleLuzCozinha01 = 5;
 int ReleLuzCozinha02 = 6;
 int ReleLuzCorredor01 = 7;
@@ -39,22 +39,21 @@ int ReleLuzQuarto02 = 16;
 int ReleLuzSuite01 = 17;
 int ReleLuzWCSuite01 = 18;
 int ReleLuzWCSuite02 = 19;
-int ReleVentSuiteWC01 = 20;
+int ReleVentWCSuite01 = 20;
 int ReleLuzExterior01 = 21;
-
 
 //---------------------------------------------------------------------------
 
 // Arduino MAC address is on a sticker on your Ethernet shield
-// must be unique for every node in same network
+// must be unique for every node in same ne02rk
 // To make a new unique address change last letter
 
 byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE };  
 
-// Unique static IP address of this Arduino - change to adapt to your network
+// Unique static IP address of this Arduino - change to adapt to your ne02rk
 IPAddress ip(192,168,0,238);
 
-// IP Address of your MQTT broker - change to adapt to your network
+// IP Address of your MQTT broker - change to adapt to your ne02rk
 byte server[] = { 192, 168, 0, 20 };
 
 // Handle and convert incoming MQTT messages ----------------------------------------
@@ -126,6 +125,7 @@ void DesligarReleLuzEntrada01(){
   digitalWrite(ReleLuzEntrada01, HIGH);
   }
 
+
 //Controlo Relé Luz da Sala 01
 void LigarReleLuzSala01(){
   digitalWrite(ReleLuzSala01, LOW);
@@ -175,7 +175,7 @@ void DesligarReleLuzWC01(){
   }
 
 //Controlo Relé Luz WC 02
-void LigarReleLuzWC01(){
+void LigarReleLuzWC02(){
   digitalWrite(ReleLuzWC02, LOW);
   }
 void DesligarReleLuzWC02(){
@@ -206,14 +206,6 @@ void DesligarReleLuzSuite01(){
   digitalWrite(ReleLuzSuite01, HIGH);
   }
 
-//Controlo Relé Luz Suite 02
-void LigarReleLuzSuite02(){
-  digitalWrite(ReleLuzSuite02, LOW);
-  }
-void DesligarReleLuzSuite02(){
-  digitalWrite(ReleLuzSuite02, HIGH);
-  }
-
 //Controlo Relé Luz WC Suite 01
 void LigarReleLuzWCSuite01(){
   digitalWrite(ReleLuzWCSuite01, LOW);
@@ -231,19 +223,20 @@ void DesligarReleLuzWCSuite02(){
   }
 
 //Controlo Relé Ventoinha WC Suite 01
-void LigarReleVentoinhaWCSuite01(){
-  digitalWrite(ReleVentoinhaWCSuite01, LOW);
+void LigarReleVentWCSuite01(){
+  digitalWrite(ReleVentWCSuite01, LOW);
   }
-void DesligarReleVentoinhaWCSuite01(){
-  digitalWrite(ReleVentoinhaWCSuite01, HIGH);
+void DesligarReleVentWCSuite01(){
+  digitalWrite(ReleVentWCSuite01, HIGH);
   }
 
 //Controlo Relé Exterior 01
 void LigarReleLuzExterior01(){
-  digitalWrite(ReleVLuzExterior01, LOW);
+  digitalWrite(ReleLuzExterior01, LOW);
   }
 void DesligarReleLuzExterior01(){
   digitalWrite(ReleLuzExterior01, HIGH);
   }
+
 
 // End of sketch ---------------------------------
