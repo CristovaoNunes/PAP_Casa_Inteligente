@@ -1,30 +1,14 @@
-//Eu deixei os comentários do código original de prepósito
 
-/*
- Example MQTT-switch-relay-node with 4 buttons and 4 leds 
- 
-  - connects to an MQTT server
-  - publishes "hello world" to the topic "led"
-  - subscribes to the topic "led"
-  - controls 4 leds on pins 2,3,5 and 6 - leds can be replaced with relays
-  - reads 4 button on pins 7,8,9 and 10
-  - turns on/off a specific led when it receives a specific "on"/"off" from the "led" topic
-  - sends a specific "on"/"off" to the "led" topic a specific button is pressed
-  - multiple arduino's with same generic sketch can run parallel to each other
-  - multiple arduino's need each to have a unique ip-addres, unique mac address and unique MQTT client-ID
+//UPDATE
+//Já consegui fazer a subscrição de vários tópicos falta só resolver a questão dos botões
 
-  - tested on arduino-uno with W5100 ethernet shield
-  - Ethernet Shield W5100 uses pins 4,10,11,12,13
-  - availbale digital pins: 1,2,3,5,6,7,8,9,10 
-*/
-
-//------------------------------------------------------------------------------
+//Código para o Arduino Due da Casa Inteligente
 
 #include <SPI.h>
 #include <Ethernet.h>
 #include <PubSubClient.h>
 
-// Set led variables to Arduino digital pins
+//Marcacão dos pinos dos Relés no Arduino
 int ReleLuzEntrada01 = 2;
 int ReleLuzSala01 = 3;
 int ReleLuzSala02 = 22;
@@ -42,22 +26,18 @@ int ReleLuzWCSuite02 = 19;
 int ReleVentWCSuite01 = 20;
 int ReleLuzExterior01 = 21;
 
-//---------------------------------------------------------------------------
+//Constantes para a Shield Ethernet
+//Endereço MAC
+byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE };
+//IP estático
+IPAddress ip(192,168,1,100);
 
-// Arduino MAC address is on a sticker on your Ethernet shield
-// must be unique for every node in same ne02rk
-// To make a new unique address change last letter
-
-byte mac[]    = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE };  
-
-// Unique static IP address of this Arduino - change to adapt to your ne02rk
-IPAddress ip(192,168,0,238);
-
-// IP Address of your MQTT broker - change to adapt to your ne02rk
-byte server[] = { 192, 168, 0, 20 };
-
-// Handle and convert incoming MQTT messages ----------------------------------------
-
+//Inicialização do MQTT
+//IP do Broker MQTT
+byte BrokerMQTT[] = {192,168,1,105};
+//Inicialização do "Serviço" EthernetClient
+EthernetClient ethClient;
+//Callback do Broker
 void callback(char* topic, byte* payload, unsigned int length) {
   // handle message arrived
   String content="";
@@ -65,73 +45,139 @@ void callback(char* topic, byte* payload, unsigned int length) {
   for (int num=0;num<length;num++) {
       character = payload[num];
       content.concat(character);
-  }   
-  Serial.println(topic);
-  Serial.println(content); // message sent out by button actions is returned from broker and serial printed
+  }
+  String topico = topic;
+  String conteudo = content;
 
-//
-//
-//----------  Pensei em usar um só tópico de controlo e vários de estado
-//
-//
-// Set specific virtual switches on basis of specific incoming messages ----------------------------
+  Serial.println(topico);
+  Serial.println(conteudo);
   
-  if (content == "ReleLuzEntrada01ON") {
-    LigarReleLuzEntrada01();
+  //Verifica o tópico /Casa/ReleLuzEntrada01/set
+  if (topico == "/Casa/ReleLuzEntrada01/set"){
+    if (conteudo == "ON") {
+      LigarReleLuzEntrada01();
+    }  
+    if (conteudo == "OFF") {
+      DesligarReleLuzEntrada01();
+    }
+  }
+
+  //Verifica o tópico /Casa/ReleLuzSala01/set
+  if (topico == "/Casa/ReleLuzSala01/set"){
+    if (conteudo == "ON") {
+      LigarReleLuzSala01();
+    }  
+    if (conteudo == "OFF") {
+      DesligarReleLuzSala01();
+    }
   }
   
-  if (content == "ReleLuzEntrada01OFF") {
-    DesligarReleLuzEntrada01();
-  }
 }
+//Inicialização do "Serviço" PubSubClient
+PubSubClient client(BrokerMQTT, 1883, callback, ethClient);
 
-// Initiate instances -----------------------------------
 
-EthernetClient ethClient;
-PubSubClient client(server, 1883, callback, ethClient);
+void setup(){
+  //Iniciar os pinos dos relés como OUTPUTs
+  pinMode(ReleLuzEntrada01, OUTPUT);
+  pinMode(ReleLuzSala01, OUTPUT);
+  pinMode(ReleLuzSala02, OUTPUT);
+  pinMode(ReleLuzCozinha01, OUTPUT);
+  pinMode(ReleLuzCozinha02, OUTPUT);
+  pinMode(ReleLuzCorredor01, OUTPUT);
+  pinMode(ReleLuzWC01, OUTPUT);
+  pinMode(ReleLuzWC02, OUTPUT);
+  pinMode(ReleVentWC01, OUTPUT);
+  pinMode(ReleLuzQuarto01, OUTPUT);
+  pinMode(ReleLuzQuarto02, OUTPUT);
+  pinMode(ReleLuzSuite01, OUTPUT);
+  pinMode(ReleLuzWCSuite01, OUTPUT);
+  pinMode(ReleLuzWCSuite02, OUTPUT);
+  pinMode(ReleVentWCSuite01, OUTPUT);
+  pinMode(ReleLuzExterior01, OUTPUT);
 
-//-------------------------------------------------------
-
-void setup()
-
-{
-  // setup serial and ethernet communications -------------------------------
+  //Iniciar os relés em HIGH ou seja DESLIGADOS
+  digitalWrite(ReleLuzEntrada01, HIGH);
+  digitalWrite(ReleLuzSala01, HIGH);
+  digitalWrite(ReleLuzSala02, HIGH);
+  digitalWrite(ReleLuzCozinha01, HIGH);
+  digitalWrite(ReleLuzCozinha02, HIGH);
+  digitalWrite(ReleLuzCorredor01, HIGH);
+  digitalWrite(ReleLuzWC01, HIGH);
+  digitalWrite(ReleLuzWC02, HIGH);
+  digitalWrite(ReleVentWC01, HIGH);
+  digitalWrite(ReleLuzQuarto01, HIGH);
+  digitalWrite(ReleLuzQuarto02, HIGH);
+  digitalWrite(ReleLuzSuite01, HIGH);
+  digitalWrite(ReleLuzWCSuite01, HIGH);
+  digitalWrite(ReleLuzWCSuite02, HIGH);
+  digitalWrite(ReleVentWCSuite01, HIGH);
+  digitalWrite(ReleLuzExterior01, HIGH);
 
   // Setup serial connection
   Serial.begin(9600);
-
   // Setup ethernet connection to MQTT broker
   Ethernet.begin(mac);
-  if (client.connect("Arduino-Due")) {                // change as desired - clientname must be unique for MQTT broker
-    client.publish("led","hello world - here arduino ip 239");
-    Serial.println("connected");
-    client.subscribe("led");                    // subscribe to topic "led"
-  }
 }
 
 //----------------------------------------------
 
-void loop()
-{
+void loop(){
+  if (!client.connected()) {
+  reconnect();
+  }
   client.loop();
 }
 
-//Start of functions
+
+//Start of functions   --------------------------------------------------------------------------------------------------------
+
+//Conexão ao Broker MQTT
+void reconnect(){
+ // Loop until we're reconnected
+ while (!client.connected()) {
+ Serial.print("Attempting MQTT connection...");
+ // Attempt to connect
+ if (client.connect("Arduino-Due")) {
+  //Se conseguir ligar
+  Serial.println("connected");
+  client.subscribe("/Casa/ReleLuzEntrada01/set");
+  client.subscribe("/Casa/ReleLuzSala01/set");
+ } else {
+  //Se falhar a ligar
+  Serial.print("failed, rc=");
+  Serial.print(client.state());
+  Serial.println(" try again in 5 seconds");
+  // Wait 5 seconds before retrying
+  delay(5000);
+  }
+ }
+}
+
+
+//--------------------------------------------------------  CONTROLO RELÉS  --------------------------------------------------------
 //Controlo Relé Luz de Entrada 01
 void LigarReleLuzEntrada01(){
   digitalWrite(ReleLuzEntrada01, LOW);
+  client.publish("/Casa/ReleLuzEntrada01/status","ON");
+  Serial.print("Luz Entrada 01 LIGADA");
   }
 void DesligarReleLuzEntrada01(){
   digitalWrite(ReleLuzEntrada01, HIGH);
+  client.publish("/Casa/ReleLuzEntrada01/status","OFF");
+  Serial.print("Luz Entrada 01 DESLIGADA");
   }
-
 
 //Controlo Relé Luz da Sala 01
 void LigarReleLuzSala01(){
   digitalWrite(ReleLuzSala01, LOW);
+  client.publish("/Casa/ReleLuzSala01/status","ON");
+  Serial.print("Luz Sala 01 LIGADA");
   }
 void DesligarReleLuzSala01(){
   digitalWrite(ReleLuzSala01, HIGH);
+  client.publish("/Casa/ReleLuzSala01/status","OFF");
+  Serial.print("Luz Sala 01 DESLIGADA");
   }
 
 //Controlo Relé Luz da sala 02
