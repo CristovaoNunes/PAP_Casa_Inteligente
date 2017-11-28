@@ -7,6 +7,10 @@
 #include <SPI.h>
 #include <Ethernet.h>
 #include <PubSubClient.h>
+#include <OneButton.h> //http://www.mathertel.de/Arduino/OneButtonLibrary.aspx
+
+// Setup a new OneButton on pin A1.  
+OneButton button1(A1, true);
 
 //Marcacão dos pinos dos Relés no Arduino
 int ReleLuzEntrada01 = 2;
@@ -25,6 +29,26 @@ int ReleLuzWCSuite01 = 18;
 int ReleLuzWCSuite02 = 19;
 int ReleVentWCSuite01 = 20;
 int ReleLuzExterior01 = 21;
+
+//Inicialização das variáveis valor dos pinos
+int ReleLuzEntrada01Value = LOW;
+int ReleLuzSala01Value = LOW;
+int ReleLuzSala02Value = LOW;
+int ReleLuzCozinha01Value = LOW;
+int ReleLuzCozinha02Value = LOW;
+int ReleLuzCorredor01Value = LOW;
+int ReleLuzWC01Value = LOW;
+int ReleLuzWC02Value = LOW;
+int ReleVentWC01Value = LOW;
+int ReleLuzQuarto01Value = LOW;
+int ReleLuzQuarto02Value = LOW;
+int ReleLuzSuite01Value = LOW;
+int ReleLuzWCSuite01Value = LOW;
+int ReleLuzWCSuite02Value = LOW;
+int ReleVentWCSuite01Value = LOW;
+int ReleLuzExterior01Value = LOW;
+
+
 
 //Constantes para a Shield Ethernet
 //Endereço MAC
@@ -78,6 +102,10 @@ PubSubClient client(BrokerMQTT, 1883, callback, ethClient);
 
 
 void setup(){
+  button1.attachClick(click1);
+  button1.attachDoubleClick(doubleclick1);
+  button1.attachLongPressStart(longPressStart1);
+  
   //Iniciar os pinos dos relés como OUTPUTs
   pinMode(ReleLuzEntrada01, OUTPUT);
   pinMode(ReleLuzSala01, OUTPUT);
@@ -114,6 +142,7 @@ void setup(){
   digitalWrite(ReleVentWCSuite01, HIGH);
   digitalWrite(ReleLuzExterior01, HIGH);
 
+
   // Setup serial connection
   Serial.begin(9600);
   // Setup ethernet connection to MQTT broker
@@ -126,6 +155,7 @@ void loop(){
   if (!client.connected()) {
   reconnect();
   }
+  button1.tick();
   client.loop();
 }
 
@@ -155,15 +185,49 @@ void reconnect(){
 }
 
 
+void click1() {
+  Serial.println("Button 1 click.");
+  if (ReleLuzEntrada01Value == LOW) {  
+        LigarReleLuzEntrada01();        
+      } else {
+        DesligarReleLuzEntrada01();
+      }
+}
+
+void doubleclick1() {
+  Serial.println("Button 1 doubleclick.");
+  if (ReleLuzSala01Value == LOW) {  
+        LigarReleLuzSala01();        
+      } else {
+        DesligarReleLuzSala01();
+      }
+}
+
+void longPressStart1() {
+  Serial.println("Button 1 longPress start");
+  if (ReleLuzSala01Value == LOW) {  
+        LigarReleLuzSala01();        
+      } else {
+        DesligarReleLuzSala01();
+      }
+  if (ReleLuzEntrada01Value == LOW) {  
+        LigarReleLuzEntrada01();        
+      } else {
+        DesligarReleLuzEntrada01();
+      }
+}
+
 //--------------------------------------------------------  CONTROLO RELÉS  --------------------------------------------------------
 //Controlo Relé Luz de Entrada 01
 void LigarReleLuzEntrada01(){
   digitalWrite(ReleLuzEntrada01, LOW);
+  ReleLuzEntrada01Value = HIGH;
   client.publish("/Casa/ReleLuzEntrada01/status","ON");
   Serial.print("Luz Entrada 01 LIGADA");
   }
 void DesligarReleLuzEntrada01(){
   digitalWrite(ReleLuzEntrada01, HIGH);
+  ReleLuzEntrada01Value = LOW;
   client.publish("/Casa/ReleLuzEntrada01/status","OFF");
   Serial.print("Luz Entrada 01 DESLIGADA");
   }
@@ -171,11 +235,13 @@ void DesligarReleLuzEntrada01(){
 //Controlo Relé Luz da Sala 01
 void LigarReleLuzSala01(){
   digitalWrite(ReleLuzSala01, LOW);
+  ReleLuzSala01Value = HIGH;
   client.publish("/Casa/ReleLuzSala01/status","ON");
   Serial.print("Luz Sala 01 LIGADA");
   }
 void DesligarReleLuzSala01(){
   digitalWrite(ReleLuzSala01, HIGH);
+  ReleLuzSala01Value = LOW;
   client.publish("/Casa/ReleLuzSala01/status","OFF");
   Serial.print("Luz Sala 01 DESLIGADA");
   }
