@@ -27,23 +27,23 @@ def main():
 			GPIO.output(23, GPIO.LOW)
 			client.publish("/Casa/Speakers/01/status", "ON", qos=0)
 			time.sleep(SleepTimeL);
-			#print "Outlet 1 ON"
+			print "Speaker 01 ON"
 		if msg.payload == "OFF" :
 			GPIO.output(23, GPIO.HIGH)
 			client.publish("/Casa/Speakers/01/status", "OFF", qos=0)
 			time.sleep(SleepTimeL);
-			#print "Outlet 1 OFF"
+			print "Speaker 01 OFF"
 	if msg.topic == "/Casa/Speakers/02/set" :
 		if msg.payload == "ON" :
 			GPIO.output(24, GPIO.LOW)
 			client.publish("/Casa/Speakers/02/status", "ON", qos=0)
 			time.sleep(SleepTimeL);
-			#print "Outlet 1 ON"
+			print "Speaker 02 ON"
 		if msg.payload == "OFF" :
 			GPIO.output(24, GPIO.HIGH)
 			client.publish("/Casa/Speakers/02/status", "OFF", qos=0)
 			time.sleep(SleepTimeL);
-			#print "Outlet 1 OFF"
+			print "Speaker 02 OFF"
 
 	
   client = mqtt.Client()
