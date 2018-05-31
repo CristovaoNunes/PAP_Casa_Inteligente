@@ -1,4 +1,4 @@
-#codigo base: https://github.com/CristovaoNunes/MQTT-Pi-Relay/blob/master/mqttrelay.py
+#codigo base: https://github.com/IDontKnow-YouTube/MQTT-Pi-Relay/blob/master/mqttrelay.py
 
 #!/usr/bin/env/python
 
